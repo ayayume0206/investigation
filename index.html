@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>きさらぎ町警察 - 総合捜査支援システム</title>
+  <link rel="stylesheet" href="investigation.css">
+  <style>
+    /* 既存のスタイル */
+    .tab-container { display: flex; gap: 5px; margin-bottom: -1px; margin-top: 20px; }
+    .tab-button {
+      background: #e9ecef; border: 1px solid #dee2e6; border-bottom: none;
+      padding: 12px 25px; cursor: pointer; font-weight: bold; color: #6c757d;
+      border-radius: 8px 8px 0 0; transition: 0.2s;
+    }
+    .tab-button.active {
+      background: #ffffff; color: #2c3e50; border-top: 4px solid #2c3e50;
+      padding-top: 9px;
+    }
+    .main-content {
+      border: 1px solid #dee2e6; border-radius: 0 8px 8px 8px;
+      padding: 30px; background: #fff; min-height: 500px;
+    }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    
+    .evidence-slot { display: flex; gap: 10px; margin-bottom: 10px; }
+    .testimony-box {
+      background: #2c3e50; color: #fff; padding: 20px; border-radius: 8px;
+      margin: 20px 0; border-left: 8px solid #e67e22; line-height: 1.8;
+    }
+    .confession-highlight { color: #f1c40f; font-weight: bold; }
+    .no-val { color: #e67e22; font-weight: bold; font-size: 1.1em; }
+    
+    /* 履歴カード */
+    .int-history-card {
+      background: #fff; border: 1px solid #dee2e6; border-left: 6px solid #c0392b;
+      border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); overflow: hidden;
+    }
+    .int-history-header { background: #f8f9fa; padding: 10px 20px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; }
+    .int-history-body { padding: 15px 20px; }
+    .evidence-tag { background: #f1f3f5; border: 1px solid #dcdfe3; padding: 4px 10px; border-radius: 4px; font-size: 0.85em; display: inline-flex; align-items: center; margin-right: 5px; }
+    .type-badge { font-size: 0.7em; font-weight: bold; padding: 2px 6px; border-radius: 3px; margin-right: 8px; color: #fff; }
+    .bg-disclosure { background-color: #2980b9; } 
+    .bg-sns { background-color: #27ae60; }        
+    .bg-camera { background-color: #8e44ad; }     
+
+    /* 【追加】運営用隠しボタン：ほぼ透明 */
+    .recovery-btn { opacity: 0.05; cursor: default; background: none; border: none; color: #8b949e; font-size: 10px; transition: 0.3s; vertical-align: middle; margin-left: 10px; }
+    .recovery-btn:hover { opacity: 1; cursor: pointer; color: #1f6feb; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>捜査支援：きさらぎ町警察本部 総合管理コンソール</h1>
+    
+    <div class="tab-container">
+      <button class="tab-button active" onclick="switchTab('disclosure')">プロバイダ開示請求</button>
+      <button class="tab-button" onclick="switchTab('interrogation')">重要参考人事情聴取</button>
+    </div>
+
+    <div class="main-content">
+      
+      <div id="tab-disclosure" class="tab-content active">
+        <div class="status-bar">
+          <div class="limit-text">
+            🚨 緊急開示執行権限 残数: <span id="limit-count" class="count">5</span> / 5
+            <button class="recovery-btn" onclick="recoveryLimit()">[ADMIN_BY_STAFF]</button>
+          </div>
+        </div>
+        <div class="search-panel">
+          <span class="panel-title">開示申請フォーム</span>
+          <div class="input-group">
+            <input type="text" id="target-handle" placeholder="@handle を入力" autocomplete="off">
+            <button id="submit-btn" onclick="executeDisclosure()">開示命令送信</button>
+          </div>
+        </div>
+        <div class="section-title">開示請求履歴ログ</div>
+        <div id="history-log"></div>
+      </div>
+
+      <div id="tab-interrogation" class="tab-content">
+        <div class="search-panel">
+          <span class="panel-title">尋問対象者の氏名</span>
+          <div class="input-group">
+            <input type="text" id="int-target-name" placeholder="氏名をフルネームで入力" autocomplete="off">
+          </div>
+          <span class="input-hint">※ 名字と名前の間はスペースを空けて入力してください</span>
+        </div>
+        <div class="evidence-area" style="background:#f8f9fa; padding:20px; border-radius:8px; border:1px solid #dee2e6;">
+          <span class="panel-title">提示する証拠</span>
+          <div id="evidence-container"></div>
+          <button class="add-secondary-btn" onclick="addEvidenceSlot()">＋ 証拠を追加</button>
+          <button onclick="executeInterrogation()" style="width:100%; height:50px; background:#c0392b; color:white; border:none; border-radius:8px; font-weight:bold; margin-top:20px; cursor:pointer;">証拠を突きつける</button>
+        </div>
+        <div id="int-output" class="testimony-box">名前を入力し、証拠を選択してください。</div>
+        <div class="section-title">尋問記録（履歴）</div>
+        <div id="interrogation-log"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="disclosureData.js"></script>
+  <script src="interrogationData.js"></script>
+
+  <script>
+    const ADMIN_KEY = "0204";
+    const evTypeMap = { "DISCLOSURE": "開示結果", "SNS": "SNS投稿", "CAMERA": "カメラ画像" };
+    
+    let disLimit = localStorage.getItem('dis_limit') !== null ? parseInt(localStorage.getItem('dis_limit')) : 4;
+    let disHistory = localStorage.getItem('dis_history') ? JSON.parse(localStorage.getItem('dis_history')) : [];
+    let intHistory = localStorage.getItem('int_history') ? JSON.parse(localStorage.getItem('int_history')) : [];
+
+    window.onload = () => { updateDisplay(); if(slotCount === 0) addEvidenceSlot(); };
+
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+      document.getElementById('tab-' + tabName).classList.add('active');
+    }
+
+    function executeDisclosure() {
+      const handle = document.getElementById('target-handle').value.trim();
+      if (!handle || disLimit <= 0) return;
+      if (disclosureData[handle]) {
+        disLimit--;
+        const now = new Date();
+        const timeStr = `${now.getHours()}:${now.getMinutes().toString().padStart(2, "0")}`;
+        disHistory.unshift({
+          handle: handle,
+          no: disclosureData[handle].no,
+          name: disclosureData[handle].name,
+          address: disclosureData[handle].address,
+          info: disclosureData[handle].info,
+          time: timeStr
+        });
+        saveState(); updateDisplay();
+        document.getElementById('target-handle').value = "";
+      } else { alert("該当するプロバイダ情報が見つかりません。"); }
+    }
+
+    // 【追加】運営用リカバリー機能：1回ずつ増やす
+    function recoveryLimit() {
+      const code = prompt("運営用リカバリーコードを入力してください：");
+      if (code === ADMIN_KEY) {
+        disLimit++; // 1回追加
+        saveState();
+        updateDisplay();
+        alert("開示執行権限を【1回】追加しました。\n現在の残り: " + disLimit + "回");
+      } else if (code !== null) {
+        alert("コードが正しくありません。");
+      }
+    }
+
+    let slotCount = 0;
+    function addEvidenceSlot() {
+      if (slotCount >= 10) return;
+      const container = document.getElementById('evidence-container');
+      const div = document.createElement('div');
+      div.className = 'evidence-slot';
+      div.innerHTML = `
+        <select class="ev-type" style="flex:1; padding:10px;">
+          <option value="SNS">SNS投稿内容</option>
+          <option value="CAMERA">防犯カメラ画像</option>
+          <option value="DISCLOSURE">開示請求結果(No.)</option>
+        </select>
+        <input type="text" class="ev-code" placeholder="コード/No.を入力" style="flex:1; padding:10px;">
+      `;
+      container.appendChild(div); slotCount++;
+    }
+
+    function executeInterrogation() {
+      const rawName = document.getElementById('int-target-name').value.trim();
+      const name = rawName.replace(/　/g, " ").replace(/\s+/g, " "); 
+      const slots = document.querySelectorAll('.evidence-slot');
+      if (!name) return alert("名前を入力してください。");
+
+      let presented = Array.from(slots).map(s => {
+        const type = s.querySelector('.ev-type').value.toLowerCase();
+        const rawCode = s.querySelector('.ev-code').value.trim();
+        let code = rawCode.replace(/[！-～]/g, str => String.fromCharCode(str.charCodeAt(0) - 0xFEE0)).replace(/[－ー―]/g, "-").toLowerCase();
+        return code ? `${type}_${code}` : null;
+      }).filter(v => v !== null);
+
+      if (presented.length === 0) return alert("証拠を入力してください。");
+
+      let response = "";
+      const person = interrogationData[name];
+
+      if (!person) {
+        response = "【記録】本事件とは無関係な人物です。";
+      } else {
+        const full = person.responses.find(r => r.type === "FULL" && r.required.every(req => presented.includes(req.toLowerCase())));
+        if (full) {
+          response = `<span class="confession-highlight">${full.text}</span>`;
+        } else {
+          const partial = person.responses.filter(r => r.type === "PARTIAL")
+                          .sort((a,b) => b.required.length - a.required.length)
+                          .find(r => r.required.every(req => presented.includes(req.toLowerCase())));
+          response = partial ? partial.text : (person.defaultResponse || "「知りませんね。」");
+        }
+      }
+
+      document.getElementById('int-output').innerHTML = `<strong>${name}:</strong><br>${response}`;
+      intHistory.unshift({ name, evidence: presented, response, time: new Date().toLocaleTimeString() });
+      saveState(); renderIntHistory();
+    }
+
+    function updateDisplay() {
+      document.getElementById('limit-count').innerText = disLimit;
+      renderDisHistory(); renderIntHistory();
+    }
+
+    function saveState() {
+      localStorage.setItem('dis_limit', disLimit);
+      localStorage.setItem('dis_history', JSON.stringify(disHistory));
+      localStorage.setItem('int_history', JSON.stringify(intHistory));
+    }
+
+    function renderDisHistory() {
+      const log = document.getElementById('history-log');
+      if (disHistory.length === 0) { log.innerHTML = '<p style="text-align:center;color:#999;">履歴なし</p>'; return; }
+      log.innerHTML = disHistory.map(h => `
+        <div class="history-card">
+          <div class="history-header"><span class="history-handle">SNS: ${h.handle}</span><span class="history-time">${h.time}</span></div>
+          <div class="history-body">
+            <div class="info-grid">
+              <div class="label">管理番号</div><div class="val no-val">${h.no}</div>
+              <div class="label">氏名</div><div class="val">${h.name}</div>
+              <div class="label">住所</div><div class="val">${h.address}</div>
+            </div>
+            <div class="memo-section"><span class="memo-title">🔍 捜査メモ</span><div class="memo-text">${h.info}</div></div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderIntHistory() {
+      const log = document.getElementById('interrogation-log');
+      if (intHistory.length === 0) { log.innerHTML = '<p style="text-align:center;color:#999;">履歴なし</p>'; return; }
+      log.innerHTML = intHistory.map(h => {
+        const evidenceHtml = h.evidence.map(ev => {
+          const [type, code] = ev.split('_');
+          const displayType = evTypeMap[type.toUpperCase()] || type;
+          return `<div class="evidence-tag"><span class="type-badge ${type === "disclosure" ? 'bg-disclosure' : type === "sns" ? 'bg-sns' : 'bg-camera'}">${displayType}</span>${code}</div>`;
+        }).join('');
+        return `<div class="int-history-card">
+          <div class="int-history-header"><span style="font-weight:bold;">尋問対象：${h.name}</span><span style="font-size:0.85em; color:#999;">${h.time}</span></div>
+          <div class="int-history-body"><div style="margin-bottom:10px;">${evidenceHtml}</div><div><strong>証言:</strong> ${h.response}</div></div>
+        </div>`;
+      }).join('');
+    }
+  </script>
+</body>
+</html>
