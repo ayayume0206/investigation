@@ -106,7 +106,7 @@
     const ADMIN_KEY = "0204";
     const evTypeMap = { "DISCLOSURE": "開示結果", "SNS": "SNS投稿", "CAMERA": "カメラ画像" };
     
-    let disLimit = localStorage.getItem('dis_limit') !== null ? parseInt(localStorage.getItem('dis_limit')) : 4;
+    let disLimit = localStorage.getItem('dis_limit') !== null ? parseInt(localStorage.getItem('dis_limit')) : 5;
     let disHistory = localStorage.getItem('dis_history') ? JSON.parse(localStorage.getItem('dis_history')) : [];
     let intHistory = localStorage.getItem('int_history') ? JSON.parse(localStorage.getItem('int_history')) : [];
 
