@@ -64,11 +64,6 @@ const interrogationData = {
       },
       {
         type: "FULL",
-        required: ["camera_a-404"],
-        text: "「その画像がどうかしましたか？道が写っていますが。せめてなんの関係があるのか言ってもらわないと。」"
-      },
-      {
-        type: "FULL",
         required: ["disclosure_7", "sns_39"],
         text: "「確かに私が契約しましたが、引っ越せてません。誰かが出入りしている噂があって、そのせいでなかなか行動できなくて…」"
       },
@@ -81,6 +76,11 @@ const interrogationData = {
         type: "FULL",
         required: ["disclosure_4", "sns_16"],
         text: "「それは大橋に脅されたんですよ！犯行の翌日の昼12時前だったと思います、T字路であいつに脅されたんです！フェイクを作って捜査を撹乱させ、世論を味方につけるように指示されました。殺したのは私ではありません。」"
+      },
+            {
+        type: "FULL",
+        required: ["camera_a-404"],
+        text: "「その画像がどうかしましたか？道が写っていますが。せめてなんの関係があるのか言ってもらわないと。」"
       },
       {
         type: "FULL",
@@ -141,8 +141,8 @@ const interrogationData = {
     responses: [
       {
         type: "FULL",
-        required: ["disclosure_6"],
-        text: "「それは私で間違いありません。被害者とはオンラインゲームを通じて仲が良かったです。」"
+        required: ["disclosure_3", "sns_31", "sns_35"],
+        text: "「一緒にゲームをしましたが、連絡がつかなくて心配だったんですよ。」"
       },
       {
         type: "FULL",
@@ -153,6 +153,11 @@ const interrogationData = {
         type: "FULL",
         required: ["disclosure_6", "sns_35"],
         text: "「文字通り一緒にゲームをしました。特に変わった様子はありませんでしたよ。」"
+      },
+      {
+        type: "FULL",
+        required: ["disclosure_6"],
+        text: "「それは私で間違いありません。被害者とはオンラインゲームを通じて仲が良かったです。」"
       },
       {
         type: "FULL",
@@ -176,11 +181,6 @@ const interrogationData = {
       },
       {
         type: "FULL",
-        required: ["disclosure_3", "sns_31", "sns_35"],
-        text: "「一緒にゲームをしましたが、連絡がつかなくて心配だったんですよ。」"
-      },
-      {
-        type: "FULL",
         required: ["sns_16"],
         text: "「僕はその時間はコンビニに行ってません。アリバイはありませんが、確かですよ。」"
       }
@@ -192,13 +192,13 @@ const interrogationData = {
     responses: [
       {
         type: "FULL",
-        required: ["disclosure_7"],
-        text: "「それは私のアカウントに間違いありません。」"
+        required: ["disclosure_7", "sns_39"],
+        text: "「本当に誰も住んでいる気配がないんですよ。高梨さんという方が契約されたお部屋ですよ。大家さんの証言：開示請求：7、ツイート：39」"
       },
       {
         type: "FULL",
-        required: ["disclosure_7", "sns_39"],
-        text: "「本当に誰も住んでいる気配がないんですよ。高梨さんという方が契約されたお部屋ですよ。大家さんの証言：開示請求：7、ツイート：39」"
+        required: ["disclosure_7"],
+        text: "「それは私のアカウントに間違いありません。」"
       },
       {
         type: "FULL",
