@@ -74,12 +74,12 @@ const interrogationData = {
       },
       {
         type: "FULL",
-        required: ["camera_a-404", "disclosure_3"],
+        required: ["camera_a-404", "disclosure_4"],
         text: "【自白】宮本が実行して、私がその指示を出しました。宮本を庇うために世論の操作を試みましたが、まさか見破られるとは。完敗です。"
       },
       {
         type: "FULL",
-        required: ["disclosure_3", "sns_16"],
+        required: ["disclosure_4", "sns_16"],
         text: "「それは大橋に脅されたんですよ！犯行の翌日の昼12時前だったと思います、T字路であいつに脅されたんです！フェイクを作って操作を撹乱させ、世論を味方につけるように指示されました。殺したのは私ではありません。」"
       },
       {
