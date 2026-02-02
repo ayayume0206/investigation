@@ -19,7 +19,7 @@ const interrogationData = {
       },
       {
         type: "FULL",
-        required: ["sns_2", "camera_a-410"],
+        required: ["disclosure_2", "camera_a-410"],
         text: "【自白】「そうです。私が七瀬さんを殺しました。彼女を自分のものにしたかったんです。」"
       },
       {
