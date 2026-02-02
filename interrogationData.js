@@ -141,7 +141,7 @@ const interrogationData = {
     responses: [
       {
         type: "FULL",
-        required: ["disclosure_3", "sns_31", "sns_35"],
+        required: ["disclosure_6", "sns_31", "sns_35"],
         text: "「一緒にゲームをしましたが、連絡がつかなくて心配だったんですよ。」"
       },
       {
