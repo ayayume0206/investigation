@@ -56,6 +56,16 @@ const interrogationData = {
         type: "FULL",
         required: ["camera_a-410"],
         text: "「怖いですね。被害者は盗撮間に追いかけられていたなんて。そいつが犯人に違いない。」"
+      },
+      {
+        type: "FULL",
+        required: ["disclosure_11"],
+        text: "「リーク？誰の何をリークしたんですか？私には関係ありませんよ。」"
+      },
+      {
+        type: "FULL",
+        required: ["disclosure_11", "disclosure_1"],
+        text: "「私はカラオケにいたと言ってるじゃないですか。高梨がそう投稿してるはずですが。私の投稿はただのイタズラですよ。」"
       }
     ]
   },
